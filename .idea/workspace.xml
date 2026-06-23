@@ -1,21 +1,96 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="ALL" />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="55cb33b0-d786-4030-92c1-9bff9c3e28d2" name="Changes" comment="" />
+    <list default="true" id="55cb33b0-d786-4030-92c1-9bff9c3e28d2" name="Changes" comment="Commit" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="6" />
     <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "Lreps90"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/Lreps90/timetable_creator.git",
+    "accountId": "1345006b-7391-4a03-ba23-f246b3de09b9"
+  }
+}]]></component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
+  </component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.8596291195654964" />
+      <entry key="MS500" value="5.6182685633138245" />
+      <entry key="S2" value="17.012354157537157" />
+      <entry key="S5" value="35.80611878536613" />
+      <entry key="S10" value="60.99239856290958" />
+      <entry key="S30" value="130.06124958773916" />
+      <entry key="S60" value="179.969332838452" />
+      <entry key="M2" value="219.52859747693108" />
+      <entry key="M5" value="250.9096016828458" />
+      <entry key="M10" value="264.07890922155696" />
+      <entry key="M15" value="270.39954538425974" />
+      <entry key="M30" value="280.67335611349534" />
+      <entry key="H1" value="289.1660762945676" />
+      <entry key="H2" value="294.8910658839974" />
+      <entry key="H4" value="298.2493314976578" />
+      <entry key="D1" value="301.34541143135476" />
+      <entry key="W1" value="301.9057345047651" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="0.0" />
+      <entry key="S10" value="0.0" />
+      <entry key="S30" value="0.0" />
+      <entry key="S60" value="0.0" />
+      <entry key="M2" value="0.0" />
+      <entry key="M5" value="0.0" />
+      <entry key="M10" value="0.0" />
+      <entry key="M15" value="0.0" />
+      <entry key="M30" value="0.0" />
+      <entry key="H1" value="0.0" />
+      <entry key="H2" value="0.0" />
+      <entry key="H4" value="0.0" />
+      <entry key="D1" value="0.0" />
+      <entry key="W1" value="0.0" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="1.6619203090511154" />
+      <entry key="MS500" value="5.459258380516154" />
+      <entry key="S2" value="16.879498404826975" />
+      <entry key="S5" value="35.68479896231266" />
+      <entry key="S10" value="60.88234232717217" />
+      <entry key="S30" value="129.97985882749455" />
+      <entry key="S60" value="179.91318008566682" />
+      <entry key="M2" value="219.49450549036786" />
+      <entry key="M5" value="250.8940661598118" />
+      <entry key="M10" value="264.07070535822874" />
+      <entry key="M15" value="270.3938952324658" />
+      <entry key="M30" value="280.67034726194083" />
+      <entry key="H1" value="289.1644850981305" />
+      <entry key="H2" value="294.89023943780273" />
+      <entry key="H4" value="298.2489090139948" />
+      <entry key="D1" value="301.34533957556084" />
+      <entry key="W1" value="301.90572420212516" />
+    </decayedShown>
   </component>
   <component name="ProjectColorInfo"><![CDATA[{
   "associatedIndex": 8,
@@ -29,6 +104,7 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "PowerShell.run_app.ps1.executor": "Run",
     "RunOnceActivity.MCP Project settings loaded": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
@@ -36,10 +112,26 @@
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
     "git-widget-placeholder": "master",
     "junie.onboarding.icon.badge.shown": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
     "to.speed.mode.migration.done": "true",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RunManager">
+    <configuration name="run_app.ps1" type="PowerShellRunType" factoryName="PowerShell" temporary="true" scriptUrl="$PROJECT_DIR$/run_app.ps1" executablePath="$PROJECT_DIR$/../../../../windows/System32/WindowsPowerShell/v1.0/powershell.exe">
+      <envs />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="PowerShell.run_app.ps1" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -55,11 +147,24 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1782211186026</updated>
-      <workItem from="1782211187312" duration="10000" />
+      <workItem from="1782211187312" duration="3555000" />
     </task>
+    <task id="LOCAL-00001" summary="Commit">
+      <option name="closed" value="true" />
+      <created>1782211361927</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1782211361928</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Commit" />
+    <option name="LAST_COMMIT_MESSAGE" value="Commit" />
   </component>
 </project>

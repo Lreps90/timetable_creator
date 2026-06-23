@@ -40,6 +40,20 @@ sample_data/
 
 ## Backend Setup
 
+Quick Windows launcher:
+
+```powershell
+.\run_app.bat
+```
+
+Run backend tests only:
+
+```powershell
+.\run_app.bat -TestOnly
+```
+
+The batch launcher uses a per-process PowerShell execution-policy bypass, so it does not change your Windows execution policy.
+
 ```powershell
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 .\.venv\Scripts\python.exe -m uvicorn backend.app.main:app --reload
