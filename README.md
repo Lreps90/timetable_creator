@@ -46,6 +46,18 @@ Quick Windows launcher:
 .\run_app.bat
 ```
 
+For the simplest double-click launcher, use:
+
+```text
+START_TIMETABLE_APP.bat
+```
+
+If Node.js is not installed, the launcher opens the built-in browser UI served by FastAPI. That URL is the backend URL, for example:
+
+```text
+http://127.0.0.1:8010/
+```
+
 If Windows blocks a port, the launcher will automatically try another local port. To force ports manually:
 
 ```powershell

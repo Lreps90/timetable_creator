@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 from backend.app.api.routes import router
 
@@ -22,5 +25,9 @@ def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-app.include_router(router)
+@app.get("/")
+def browser_app() -> FileResponse:
+    return FileResponse(Path(__file__).parent / "static" / "index.html")
 
+
+app.include_router(router)

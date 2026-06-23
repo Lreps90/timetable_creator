@@ -4,54 +4,59 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="55cb33b0-d786-4030-92c1-9bff9c3e28d2" name="Changes" comment="Commit" />
+    <list default="true" id="55cb33b0-d786-4030-92c1-9bff9c3e28d2" name="Changes" comment="Commit">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_app.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/run_app.ps1" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="6" />
+    <option name="cachedIndexableFilesCount" value="111" />
     <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "Lreps90"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Lreps90&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/Lreps90/timetable_creator.git",
-    "accountId": "1345006b-7391-4a03-ba23-f246b3de09b9"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Lreps90/timetable_creator.git&quot;,
+    &quot;accountId&quot;: &quot;1345006b-7391-4a03-ba23-f246b3de09b9&quot;
   }
-}]]></component>
+}</component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.8596291195654964" />
-      <entry key="MS500" value="5.6182685633138245" />
-      <entry key="S2" value="17.012354157537157" />
-      <entry key="S5" value="35.80611878536613" />
-      <entry key="S10" value="60.99239856290958" />
-      <entry key="S30" value="130.06124958773916" />
-      <entry key="S60" value="179.969332838452" />
-      <entry key="M2" value="219.52859747693108" />
-      <entry key="M5" value="250.9096016828458" />
-      <entry key="M10" value="264.07890922155696" />
-      <entry key="M15" value="270.39954538425974" />
-      <entry key="M30" value="280.67335611349534" />
-      <entry key="H1" value="289.1660762945676" />
-      <entry key="H2" value="294.8910658839974" />
-      <entry key="H4" value="298.2493314976578" />
-      <entry key="D1" value="301.34541143135476" />
-      <entry key="W1" value="301.9057345047651" />
+      <entry key="MS100" value="1.4743377745192943" />
+      <entry key="MS500" value="2.9833654094974267" />
+      <entry key="S2" value="9.614739068120825" />
+      <entry key="S5" value="15.69995362480353" />
+      <entry key="S10" value="18.902339556403625" />
+      <entry key="S30" value="21.519106839759978" />
+      <entry key="S60" value="22.24408851625738" />
+      <entry key="M2" value="22.636889835701883" />
+      <entry key="M5" value="24.773029454430855" />
+      <entry key="M10" value="37.728746583440476" />
+      <entry key="M15" value="59.7324524401255" />
+      <entry key="M30" value="128.36812981225412" />
+      <entry key="H1" value="210.7256956913238" />
+      <entry key="H2" value="276.74862715944005" />
+      <entry key="H4" value="318.9746814769536" />
+      <entry key="D1" value="360.0574312635788" />
+      <entry key="W1" value="367.7067617767399" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -73,29 +78,29 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.6619203090511154" />
-      <entry key="MS500" value="5.459258380516154" />
-      <entry key="S2" value="16.879498404826975" />
-      <entry key="S5" value="35.68479896231266" />
-      <entry key="S10" value="60.88234232717217" />
-      <entry key="S30" value="129.97985882749455" />
-      <entry key="S60" value="179.91318008566682" />
-      <entry key="M2" value="219.49450549036786" />
-      <entry key="M5" value="250.8940661598118" />
-      <entry key="M10" value="264.07070535822874" />
-      <entry key="M15" value="270.3938952324658" />
-      <entry key="M30" value="280.67034726194083" />
-      <entry key="H1" value="289.1644850981305" />
-      <entry key="H2" value="294.89023943780273" />
-      <entry key="H4" value="298.2489090139948" />
-      <entry key="D1" value="301.34533957556084" />
-      <entry key="W1" value="301.90572420212516" />
+      <entry key="MS100" value="1.3320642362412864" />
+      <entry key="MS500" value="2.9223841657094205" />
+      <entry key="S2" value="9.563105879880379" />
+      <entry key="S5" value="15.663807238799707" />
+      <entry key="S10" value="18.879934422670033" />
+      <entry key="S30" value="21.51042485928213" />
+      <entry key="S60" value="22.239577026303408" />
+      <entry key="M2" value="22.63458796254299" />
+      <entry key="M5" value="24.7720035029992" />
+      <entry key="M10" value="37.727866206679664" />
+      <entry key="M15" value="59.73142294145835" />
+      <entry key="M30" value="128.3668901892011" />
+      <entry key="H1" value="210.72461825614005" />
+      <entry key="H2" value="276.7478978213234" />
+      <entry key="H4" value="318.97425437398266" />
+      <entry key="D1" value="360.057349786145" />
+      <entry key="W1" value="367.70674986078393" />
     </decayedShown>
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 8,
-  "fromUser": false
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8,
+  &quot;fromUser&quot;: false
+}</component>
   <component name="ProjectId" id="3FXAkXOMBRKcEdYLjIfAEc2PQ1Q" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -103,7 +108,10 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Batch.START_TIMETABLE_APP.executor": "Run",
+    "Batch.run_app.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "PowerShell.run_app.ps1 (1).executor": "Run",
     "PowerShell.run_app.ps1.executor": "Run",
     "RunOnceActivity.MCP Project settings loaded": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -121,13 +129,38 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Batch.START_TIMETABLE_APP">
+    <configuration name="START_TIMETABLE_APP" type="BatchConfigurationType" factoryName="Batch" temporary="true">
+      <module name="timetable_creator" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="WORKING_DIRECTORY" value="C:\Users\Lreps\PycharmProjects\timetable_creator" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SCRIPT_NAME" value="START_TIMETABLE_APP.bat" />
+      <option name="PARAMETERS" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="run_app" type="BatchConfigurationType" factoryName="Batch" temporary="true">
+      <module name="timetable_creator" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SCRIPT_NAME" value="run_app.bat" />
+      <option name="PARAMETERS" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="run_app.ps1 (1)" type="PowerShellRunType" factoryName="PowerShell" temporary="true" scriptUrl="$PROJECT_DIR$/run_app.ps1" executablePath="$PROJECT_DIR$/../../../../windows/System32/WindowsPowerShell/v1.0/powershell.exe">
+      <envs />
+      <method v="2" />
+    </configuration>
     <configuration name="run_app.ps1" type="PowerShellRunType" factoryName="PowerShell" temporary="true" scriptUrl="$PROJECT_DIR$/run_app.ps1" executablePath="$PROJECT_DIR$/../../../../windows/System32/WindowsPowerShell/v1.0/powershell.exe">
       <envs />
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Batch.START_TIMETABLE_APP" />
+        <item itemvalue="Batch.run_app" />
+        <item itemvalue="PowerShell.run_app.ps1 (1)" />
         <item itemvalue="PowerShell.run_app.ps1" />
       </list>
     </recent_temporary>
@@ -147,7 +180,8 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1782211186026</updated>
-      <workItem from="1782211187312" duration="3555000" />
+      <workItem from="1782211187312" duration="5325000" />
+      <workItem from="1782219283625" duration="1342000" />
     </task>
     <task id="LOCAL-00001" summary="Commit">
       <option name="closed" value="true" />
@@ -157,7 +191,31 @@
       <option name="project" value="LOCAL" />
       <updated>1782211361928</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Commit">
+      <option name="closed" value="true" />
+      <created>1782215632271</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1782215632272</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Commit">
+      <option name="closed" value="true" />
+      <created>1782215823329</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1782215823329</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Commit">
+      <option name="closed" value="true" />
+      <created>1782217435589</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1782217435589</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

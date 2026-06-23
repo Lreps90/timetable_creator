@@ -102,10 +102,11 @@ function Start-Frontend {
     if (-not $npm) {
         Write-Host ""
         Write-Host "Node.js/npm was not found on PATH." -ForegroundColor Yellow
-        Write-Host "The backend is running, but the React browser UI needs Node.js."
-        Write-Host "Install Node.js, then rerun this script."
+        Write-Host "Opening the built-in browser UI served by FastAPI instead."
+        Write-Host "Install Node.js later if you want to run the React/Vite development UI."
         if (-not $NoBrowser) {
-            Start-Process "http://127.0.0.1:$ApiPort/docs"
+            Start-Sleep -Seconds 3
+            Start-Process "http://127.0.0.1:$ApiPort/"
         }
         return
     }
