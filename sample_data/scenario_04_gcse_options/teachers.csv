@@ -1,0 +1,8 @@
+teacher_id,name,role,department,working_days,max_lessons_per_week,max_lessons_per_day,unavailable_periods,notes
+T001,Alice Green,Teacher,English,Mon|Tue|Wed|Thu|Fri,18,5,,
+T002,Ben Patel,Teacher,Maths,Mon|Tue|Wed|Thu|Fri,18,5,,
+T003,Cara Hughes,Teacher,Science,Mon|Tue|Wed|Thu|Fri,18,5,,
+T006,Faisal Khan,Teacher,Computing,Mon|Tue|Wed|Thu|Fri,10,4,,
+T008,Helen Brooks,Teacher,Art,Mon|Tue|Wed|Thu|Fri,10,4,,
+T009,Ian Clark,Teacher,Geography,Mon|Tue|Wed|Thu|Fri,10,4,,
+T010,Jaya Singh,Teacher,Modern Languages,Mon|Tue|Wed|Thu|Fri,10,4,,

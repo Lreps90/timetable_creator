@@ -1,0 +1,5 @@
+subject,year_group,lessons_per_week,allowed_patterns,double_lessons_allowed,max_same_subject_per_day,notes
+English,7,2,1+1,FALSE,1,
+Mathematics,7,2,1+1,FALSE,1,
+Science,7,2,1+1,FALSE,1,
+History,7,1,1,FALSE,1,

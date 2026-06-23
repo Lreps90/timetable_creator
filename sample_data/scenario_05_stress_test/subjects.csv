@@ -1,0 +1,10 @@
+subject,department,is_core,default_room_type
+English,English,TRUE,General
+Mathematics,Maths,TRUE,General
+Science,Science,TRUE,Lab
+History,Humanities,FALSE,General
+Geography,Humanities,FALSE,General
+PE,PE,FALSE,Sports
+Computer Science,Computing,FALSE,ICT
+Art,Creative Arts,FALSE,Art
+Spanish,Modern Languages,FALSE,General

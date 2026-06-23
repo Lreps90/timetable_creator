@@ -1,0 +1,4 @@
+room_id,room_name,room_type,capacity,has_computers,computer_count,available_days,unavailable_periods,notes
+G101,Room G101,General,32,FALSE,0,Mon|Tue|Wed|Thu|Fri,,
+G102,Room G102,General,32,FALSE,0,Mon|Tue|Wed|Thu|Fri,,
+L201,Science Lab,Lab,30,FALSE,0,Mon|Tue|Wed|Thu|Fri,,

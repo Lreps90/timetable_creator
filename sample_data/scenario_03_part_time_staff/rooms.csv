@@ -1,0 +1,8 @@
+room_id,room_name,room_type,capacity,has_computers,computer_count,available_days,unavailable_periods,notes
+G101,Room G101,General,32,FALSE,0,Mon|Tue|Wed|Thu|Fri,,
+G102,Room G102,General,32,FALSE,0,Mon|Tue|Wed|Thu|Fri,,
+G103,Room G103,General,32,FALSE,0,Mon|Tue|Wed|Thu|Fri,,
+L201,Science Lab 1,Lab,30,FALSE,0,Mon|Tue|Wed|Thu|Fri,,
+L202,Science Lab 2,Lab,30,FALSE,0,Mon|Tue|Wed|Thu|Fri,,
+I301,ICT Suite,ICT,30,TRUE,30,Mon|Tue|Wed|Thu|Fri,,
+S401,Sports Hall,Sports,60,FALSE,0,Tue|Thu|Fri,,

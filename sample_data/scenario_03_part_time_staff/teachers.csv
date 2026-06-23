@@ -1,0 +1,8 @@
+teacher_id,name,role,department,working_days,max_lessons_per_week,max_lessons_per_day,unavailable_periods,notes
+T001,Alice Green,Teacher,English,Mon|Tue|Wed|Thu|Fri,18,5,,
+T002,Ben Patel,Teacher,Maths,Mon|Tue|Wed|Thu|Fri,18,5,,
+T003,Cara Hughes,Teacher,Science,Mon|Wed|Fri,12,4,Wed-P5,Part time science teacher
+T004,Dan Morgan,Teacher,Humanities,Mon|Tue|Wed|Thu|Fri,15,5,,
+T005,Elena Rossi,Teacher,PE,Tue|Thu|Fri,8,4,Fri-P5,Part time PE teacher
+T006,Faisal Khan,Teacher,Computing,Mon|Tue|Wed|Thu|Fri,10,4,,
+T007,Grace Hall,Teacher,Science,Mon|Tue|Thu|Fri,8,4,,Second science teacher

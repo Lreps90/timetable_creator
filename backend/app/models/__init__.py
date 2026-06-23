@@ -1,0 +1,42 @@
+from .entities import (
+    Constraint,
+    CurriculumRow,
+    FixedEvent,
+    LessonAssignment,
+    LessonPattern,
+    OptionBlock,
+    Room,
+    SchoolStructure,
+    SolveResult,
+    SolveSettings,
+    SolveStatus,
+    Subject,
+    SubjectRoomRequirement,
+    Teacher,
+    TeacherSubject,
+    TeachingGroup,
+    ValidationIssue,
+)
+from .project import ProjectData
+
+__all__ = [
+    "Constraint",
+    "CurriculumRow",
+    "FixedEvent",
+    "LessonAssignment",
+    "LessonPattern",
+    "OptionBlock",
+    "ProjectData",
+    "Room",
+    "SchoolStructure",
+    "SolveResult",
+    "SolveSettings",
+    "SolveStatus",
+    "Subject",
+    "SubjectRoomRequirement",
+    "Teacher",
+    "TeacherSubject",
+    "TeachingGroup",
+    "ValidationIssue",
+]
+

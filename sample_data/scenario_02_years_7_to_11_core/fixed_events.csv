@@ -1,0 +1,3 @@
+event_id,event_name,event_type,applies_to,day,period,duration_periods,required_teacher_ids,required_room_ids,notes
+FE001,Year 7 Assembly,assembly,Y7,Mon,P1,1,,,Blocks Year 7 groups
+FE002,SLT Briefing,meeting,SLT,Tue,P1,1,,,Only SLT if any exist

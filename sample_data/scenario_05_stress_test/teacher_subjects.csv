@@ -1,0 +1,13 @@
+teacher_id,subject,priority,max_lessons_in_subject,can_teach_years
+T001,English,1,,7|8|9|10|11
+T011,English,2,,7|8|9|10|11
+T002,Mathematics,1,,7|8|9|10|11
+T012,Mathematics,2,,7|8|9|10|11
+T003,Science,1,,7|8|9|10|11
+T007,Science,2,,7|8|9|10|11
+T004,History,1,,7|8|9
+T004,Geography,1,,9|10|11
+T005,PE,1,,7|8|9
+T006,Computer Science,1,,9|10|11
+T008,Art,1,,10|11
+T010,Spanish,1,,10|11

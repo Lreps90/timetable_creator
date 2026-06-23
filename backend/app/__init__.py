@@ -1,0 +1,2 @@
+"""School timetabling backend package."""
+

@@ -1,0 +1,9 @@
+group_id,year_group,subject,lessons_per_week,class_size,group_type,option_block,allowed_teachers,preferred_teacher,notes
+7A_ENG,7,English,2,28,core,,,T001,
+7A_MAT,7,Mathematics,2,28,core,,,T002,
+7A_SCI,7,Science,2,28,core,,,T003,
+7A_HIS,7,History,1,28,core,,,T004,
+7B_ENG,7,English,2,27,core,,,T001,
+7B_MAT,7,Mathematics,2,27,core,,,T002,
+7B_SCI,7,Science,2,27,core,,,T003,
+7B_HIS,7,History,1,27,core,,,T004,

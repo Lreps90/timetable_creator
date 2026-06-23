@@ -1,0 +1,5 @@
+subject,required_room_type,allow_general_room,notes
+Science,Lab,FALSE,Science must use a lab
+English,General,TRUE,
+Mathematics,General,TRUE,
+History,General,TRUE,

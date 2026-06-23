@@ -1,0 +1,7 @@
+subject,required_room_type,allow_general_room,notes
+Science,Lab,FALSE,Science must use a lab
+Computer Science,ICT,FALSE,Computing must use ICT
+PE,Sports,FALSE,PE must use sports facilities
+English,General,TRUE,
+Mathematics,General,TRUE,
+History,General,TRUE,

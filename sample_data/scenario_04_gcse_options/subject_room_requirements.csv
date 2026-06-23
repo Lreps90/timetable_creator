@@ -1,0 +1,8 @@
+subject,required_room_type,allow_general_room,notes
+Science,Lab,FALSE,Science must use a lab
+Computer Science,ICT,FALSE,Computing must use ICT
+Art,Art,FALSE,Art must use an art room
+English,General,TRUE,
+Mathematics,General,TRUE,
+Geography,General,TRUE,
+Spanish,General,TRUE,

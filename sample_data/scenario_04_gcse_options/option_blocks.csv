@@ -1,0 +1,7 @@
+year_group,block,group_id,subject,simultaneous_required,notes
+10,A,10A_CS,Computer Science,TRUE,GCSE option block A
+10,A,10A_ART,Art,TRUE,GCSE option block A
+10,A,10A_GEO,Geography,TRUE,GCSE option block A
+11,A,11A_CS,Computer Science,TRUE,GCSE option block A
+11,A,11A_ART,Art,TRUE,GCSE option block A
+11,A,11A_GEO,Geography,TRUE,GCSE option block A

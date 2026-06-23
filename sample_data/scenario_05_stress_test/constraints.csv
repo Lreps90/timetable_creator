@@ -1,0 +1,9 @@
+constraint_name,constraint_type,weight,enabled,description
+spread_group_lessons,SOFT,3,TRUE,Spread a group's lessons across the week
+same_subject,SOFT,5,TRUE,Avoid the same subject twice on the same day
+priority_teacher,SOFT,2,TRUE,Prefer priority 1 teachers over priority 2 teachers
+preferred_teacher,SOFT,4,TRUE,Prefer preferred_teacher where provided
+consecutive_teacher,SOFT,2,TRUE,Avoid too many consecutive lessons for a teacher
+balance_teacher_load,SOFT,1,TRUE,Balance teacher load across days
+option_end,SOFT,6,TRUE,Avoid GCSE option lessons at the end of the day
+emergency_staff,SOFT,8,TRUE,Avoid emergency priority 3 staff

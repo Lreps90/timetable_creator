@@ -1,0 +1,4 @@
+event_id,event_name,event_type,applies_to,day,period,duration_periods,required_teacher_ids,required_room_ids,notes
+FE001,Year 7 Assembly,assembly,Y7,Mon,P1,1,,,Blocks Year 7 groups
+FE002,Staff Briefing,meeting,ALL_STAFF,Fri,P5,1,,,Blocks all teachers
+FE003,Lab Cleaning,maintenance,L202,Thu,P5,1,,,Blocks one lab

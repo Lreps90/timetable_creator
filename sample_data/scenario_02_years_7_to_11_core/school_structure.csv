@@ -1,0 +1,6 @@
+key,value
+days_per_week,5
+periods_per_day,5
+cycle_weeks,1
+days,Mon|Tue|Wed|Thu|Fri
+periods,P1|P2|P3|P4|P5
