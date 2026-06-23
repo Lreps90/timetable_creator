@@ -2,7 +2,9 @@ param(
     [switch]$TestOnly,
     [switch]$BackendOnly,
     [switch]$NoInstall,
-    [switch]$NoBrowser
+    [switch]$NoBrowser,
+    [int]$BackendPort = 0,
+    [int]$FrontendPort = 0
 )
 
 $ErrorActionPreference = "Stop"
@@ -39,15 +41,63 @@ function Find-Python {
     return $VenvPython
 }
 
-function Start-Backend {
-    param([string]$PythonPath)
+function Test-PortAvailable {
+    param([int]$Port)
 
-    Write-Step "Starting FastAPI backend"
-    $command = "Set-Location '$Root'; & '$PythonPath' -m uvicorn backend.app.main:app --reload --host 127.0.0.1 --port 8000"
+    $listener = $null
+    try {
+        $address = [System.Net.IPAddress]::Parse("127.0.0.1")
+        $listener = [System.Net.Sockets.TcpListener]::new($address, $Port)
+        $listener.Start()
+        return $true
+    } catch {
+        return $false
+    } finally {
+        if ($listener) {
+            $listener.Stop()
+        }
+    }
+}
+
+function Find-AvailablePort {
+    param(
+        [int]$PreferredPort,
+        [int[]]$FallbackPorts
+    )
+
+    if ($PreferredPort -gt 0) {
+        if (Test-PortAvailable -Port $PreferredPort) {
+            return $PreferredPort
+        }
+        throw "Port $PreferredPort is not available. Choose another port."
+    }
+
+    foreach ($port in $FallbackPorts) {
+        if (Test-PortAvailable -Port $port) {
+            return $port
+        }
+    }
+
+    throw "Could not find an available local port."
+}
+
+function Start-Backend {
+    param(
+        [string]$PythonPath,
+        [int]$Port
+    )
+
+    Write-Step "Starting FastAPI backend on port $Port"
+    $command = "Set-Location '$Root'; & '$PythonPath' -m uvicorn backend.app.main:app --reload --host 127.0.0.1 --port $Port"
     Start-Process powershell -ArgumentList @("-NoExit", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", $command)
 }
 
 function Start-Frontend {
+    param(
+        [int]$Port,
+        [int]$ApiPort
+    )
+
     $npm = Get-Command npm -ErrorAction SilentlyContinue
     if (-not $npm) {
         Write-Host ""
@@ -55,7 +105,7 @@ function Start-Frontend {
         Write-Host "The backend is running, but the React browser UI needs Node.js."
         Write-Host "Install Node.js, then rerun this script."
         if (-not $NoBrowser) {
-            Start-Process "http://127.0.0.1:8000/docs"
+            Start-Process "http://127.0.0.1:$ApiPort/docs"
         }
         return
     }
@@ -70,14 +120,14 @@ function Start-Frontend {
         Pop-Location
     }
 
-    Write-Step "Starting Vite frontend"
+    Write-Step "Starting Vite frontend on port $Port"
     $frontendRoot = Join-Path $Root "frontend"
-    $command = "Set-Location '$frontendRoot'; npm run dev"
+    $command = "Set-Location '$frontendRoot'; `$env:VITE_BACKEND_URL='http://127.0.0.1:$ApiPort'; npm run dev -- --host 127.0.0.1 --port $Port"
     Start-Process powershell -ArgumentList @("-NoExit", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", $command)
 
     if (-not $NoBrowser) {
         Start-Sleep -Seconds 4
-        Start-Process "http://127.0.0.1:5173"
+        Start-Process "http://127.0.0.1:$Port"
     }
 }
 
@@ -94,27 +144,31 @@ if ($TestOnly) {
     exit $LASTEXITCODE
 }
 
-Start-Backend -PythonPath $Python
+$BackendPort = Find-AvailablePort -PreferredPort $BackendPort -FallbackPorts @(8000, 8001, 8010, 8080, 8888, 9000, 5000, 5050)
+$FrontendPort = Find-AvailablePort -PreferredPort $FrontendPort -FallbackPorts @(5173, 5174, 5175, 3000, 3001, 4173)
+
+Start-Backend -PythonPath $Python -Port $BackendPort
 
 if ($BackendOnly) {
     if (-not $NoBrowser) {
         Start-Sleep -Seconds 3
-        Start-Process "http://127.0.0.1:8000/docs"
+        Start-Process "http://127.0.0.1:$BackendPort/docs"
     }
     Write-Host ""
-    Write-Host "Backend: http://127.0.0.1:8000"
-    Write-Host "API docs: http://127.0.0.1:8000/docs"
+    Write-Host "Backend: http://127.0.0.1:$BackendPort"
+    Write-Host "API docs: http://127.0.0.1:$BackendPort/docs"
     exit 0
 }
 
-Start-Frontend
+Start-Frontend -Port $FrontendPort -ApiPort $BackendPort
 
 Write-Host ""
-Write-Host "Backend:  http://127.0.0.1:8000"
-Write-Host "API docs: http://127.0.0.1:8000/docs"
-Write-Host "Frontend: http://127.0.0.1:5173"
+Write-Host "Backend:  http://127.0.0.1:$BackendPort"
+Write-Host "API docs: http://127.0.0.1:$BackendPort/docs"
+Write-Host "Frontend: http://127.0.0.1:$FrontendPort"
 Write-Host ""
 Write-Host "Useful options:"
 Write-Host "  .\run_app.ps1 -TestOnly"
 Write-Host "  .\run_app.ps1 -BackendOnly"
 Write-Host "  .\run_app.ps1 -NoInstall"
+Write-Host "  .\run_app.ps1 -BackendPort 8010 -FrontendPort 5174"

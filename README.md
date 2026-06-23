@@ -46,6 +46,12 @@ Quick Windows launcher:
 .\run_app.bat
 ```
 
+If Windows blocks a port, the launcher will automatically try another local port. To force ports manually:
+
+```powershell
+.\run_app.bat -BackendPort 8010 -FrontendPort 5174
+```
+
 Run backend tests only:
 
 ```powershell
