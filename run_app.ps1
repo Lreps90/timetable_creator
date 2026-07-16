@@ -10,6 +10,8 @@ param(
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $Root
+$script:BrowserUiUrl = $null
+$script:BrowserUiLabel = $null
 
 function Write-Step {
     param([string]$Message)
@@ -104,9 +106,11 @@ function Start-Frontend {
         Write-Host "Node.js/npm was not found on PATH." -ForegroundColor Yellow
         Write-Host "Opening the built-in browser UI served by FastAPI instead."
         Write-Host "Install Node.js later if you want to run the React/Vite development UI."
+        $script:BrowserUiUrl = "http://127.0.0.1:$ApiPort/"
+        $script:BrowserUiLabel = "Built-in UI"
         if (-not $NoBrowser) {
             Start-Sleep -Seconds 3
-            Start-Process "http://127.0.0.1:$ApiPort/"
+            Start-Process $script:BrowserUiUrl
         }
         return
     }
@@ -125,10 +129,12 @@ function Start-Frontend {
     $frontendRoot = Join-Path $Root "frontend"
     $command = "Set-Location '$frontendRoot'; `$env:VITE_BACKEND_URL='http://127.0.0.1:$ApiPort'; npm run dev -- --host 127.0.0.1 --port $Port"
     Start-Process powershell -ArgumentList @("-NoExit", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", $command)
+    $script:BrowserUiUrl = "http://127.0.0.1:$Port"
+    $script:BrowserUiLabel = "React/Vite UI"
 
     if (-not $NoBrowser) {
         Start-Sleep -Seconds 4
-        Start-Process "http://127.0.0.1:$Port"
+        Start-Process $script:BrowserUiUrl
     }
 }
 
@@ -166,7 +172,9 @@ Start-Frontend -Port $FrontendPort -ApiPort $BackendPort
 Write-Host ""
 Write-Host "Backend:  http://127.0.0.1:$BackendPort"
 Write-Host "API docs: http://127.0.0.1:$BackendPort/docs"
-Write-Host "Frontend: http://127.0.0.1:$FrontendPort"
+if ($script:BrowserUiUrl) {
+    Write-Host "$($script:BrowserUiLabel): $script:BrowserUiUrl"
+}
 Write-Host ""
 Write-Host "Useful options:"
 Write-Host "  .\run_app.ps1 -TestOnly"

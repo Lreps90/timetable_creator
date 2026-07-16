@@ -5,9 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="55cb33b0-d786-4030-92c1-9bff9c3e28d2" name="Changes" comment="Commit">
+      <change beforePath="$PROJECT_DIR$/.idea/timetable_creator.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/timetable_creator.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run_app.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/run_app.ps1" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -15,8 +15,13 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="CopilotPersistence">
+    <persistenceIdMap>
+      <entry key="_C:/Users/leere/PycharmProjects/timetable_creator" value="3FXAkXOMBRKcEdYLjIfAEc2PQ1Q" />
+    </persistenceIdMap>
+  </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="111" />
+    <option name="cachedIndexableFilesCount" value="112" />
     <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
   </component>
   <component name="Git.Settings">
@@ -30,8 +35,8 @@
 }</component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/Lreps90/timetable_creator.git&quot;,
-    &quot;accountId&quot;: &quot;1345006b-7391-4a03-ba23-f246b3de09b9&quot;
+    &quot;url&quot;: &quot;https://github.com/Lreps90/timetable_creator&quot;,
+    &quot;accountId&quot;: &quot;12a9b2e8-14f6-4021-acbb-342ec6912150&quot;
   }
 }</component>
   <component name="McpProjectServerCommands">
@@ -102,34 +107,51 @@
   &quot;fromUser&quot;: false
 }</component>
   <component name="ProjectId" id="3FXAkXOMBRKcEdYLjIfAEc2PQ1Q" />
+  <component name="ProjectSessionTemplates">
+    <option name="panelTemplate">
+      <template>
+        <option name="modeId" value="Agent" />
+        <option name="model">
+          <model>
+            <option name="modelType" value="builtin_family" />
+            <option name="modelValue" value="auto" />
+          </model>
+        </option>
+        <option name="targetType" value="BACKGROUND" />
+      </template>
+    </option>
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Batch.START_TIMETABLE_APP.executor": "Run",
-    "Batch.run_app.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "PowerShell.run_app.ps1 (1).executor": "Run",
-    "PowerShell.run_app.ps1.executor": "Run",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "master",
-    "junie.onboarding.icon.badge.shown": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "to.speed.mode.migration.done": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Batch.START_TIMETABLE_APP.executor&quot;: &quot;Run&quot;,
+    &quot;Batch.run_app.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;PowerShell.run_app.ps1 (1).executor&quot;: &quot;Run&quot;,
+    &quot;PowerShell.run_app.ps1.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;copilot.chat.legacySessionMetadata.migrated&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;ml.llm.AcpAgentsConfigurable&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
-  <component name="RunManager" selected="Batch.START_TIMETABLE_APP">
+}</component>
+  <component name="RunManager" selected="PowerShell.run_app.ps1">
     <configuration name="START_TIMETABLE_APP" type="BatchConfigurationType" factoryName="Batch" temporary="true">
       <module name="timetable_creator" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -152,14 +174,13 @@
       <envs />
       <method v="2" />
     </configuration>
-    <configuration name="run_app.ps1" type="PowerShellRunType" factoryName="PowerShell" temporary="true" scriptUrl="$PROJECT_DIR$/run_app.ps1" executablePath="$PROJECT_DIR$/../../../../windows/System32/WindowsPowerShell/v1.0/powershell.exe">
+    <configuration name="run_app.ps1" type="PowerShellRunType" factoryName="PowerShell" temporary="true" scriptUrl="$PROJECT_DIR$/run_app.ps1" executablePath="$PROJECT_DIR$/../../../../Windows/System32/WindowsPowerShell/v1.0/powershell.exe">
       <envs />
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Batch.START_TIMETABLE_APP" />
-        <item itemvalue="Batch.run_app" />
+        <item itemvalue="PowerShell.run_app.ps1" />
         <item itemvalue="PowerShell.run_app.ps1 (1)" />
         <item itemvalue="PowerShell.run_app.ps1" />
       </list>
@@ -168,8 +189,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-PY-261.24374.152" />
-        <option value="bundled-python-sdk-c59985aa861c-c2ffad84badb-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-261.24374.152" />
+        <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-PY-261.26222.68" />
+        <option value="bundled-python-sdk-50341a9f1f9c-c2ffad84badb-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-261.26222.68" />
       </set>
     </attachedChunks>
   </component>
@@ -182,6 +203,9 @@
       <updated>1782211186026</updated>
       <workItem from="1782211187312" duration="5325000" />
       <workItem from="1782219283625" duration="1342000" />
+      <workItem from="1782293513380" duration="2132000" />
+      <workItem from="1782374664021" duration="64000" />
+      <workItem from="1784189145869" duration="1129000" />
     </task>
     <task id="LOCAL-00001" summary="Commit">
       <option name="closed" value="true" />

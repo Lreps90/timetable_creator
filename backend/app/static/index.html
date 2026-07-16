@@ -1,0 +1,865 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Timetable Creator</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --ink: #182230;
+      --muted: #667085;
+      --line: #d7dde8;
+      --primary: #176b87;
+      --primary-dark: #10556d;
+      --accent: #8a5a00;
+      --danger: #b42318;
+      --ok: #15704f;
+      --soft: #eef6f8;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.45;
+    }
+
+    button, input, select {
+      font: inherit;
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: #111827;
+      color: #f9fafb;
+      padding: 24px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      min-height: 48px;
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: #176b87;
+      color: #ffffff;
+      font-weight: 800;
+    }
+
+    .brand strong, .brand span {
+      display: block;
+    }
+
+    .brand span {
+      color: #b6c2d2;
+      font-size: 0.88rem;
+    }
+
+    .nav {
+      display: grid;
+      gap: 8px;
+    }
+
+    .nav button {
+      min-height: 42px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: transparent;
+      color: #dbe4f0;
+      text-align: left;
+      padding: 10px 12px;
+      cursor: pointer;
+    }
+
+    .nav button.active {
+      background: #263447;
+      border-color: #3b4c64;
+      color: #ffffff;
+    }
+
+    .nav button:disabled {
+      color: #758298;
+      cursor: not-allowed;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      color: #b6c2d2;
+      font-size: 0.9rem;
+      word-break: break-word;
+    }
+
+    main {
+      padding: 28px;
+      min-width: 0;
+    }
+
+    .page {
+      display: none;
+      max-width: 1180px;
+    }
+
+    .page.active {
+      display: grid;
+      gap: 18px;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    h1, h2, h3, p {
+      margin-top: 0;
+    }
+
+    h1 {
+      margin-bottom: 6px;
+      font-size: 2rem;
+    }
+
+    h2 {
+      font-size: 1.15rem;
+      margin-bottom: 12px;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+    }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fbfcfe;
+    }
+
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.55rem;
+      margin-top: 4px;
+    }
+
+    .upload-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .upload-target {
+      display: grid;
+      gap: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfe;
+      padding: 16px;
+      cursor: pointer;
+      min-height: 142px;
+    }
+
+    .upload-target strong {
+      font-size: 1.05rem;
+    }
+
+    .upload-target input {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .primary, .secondary {
+      border-radius: 8px;
+      padding: 10px 14px;
+      border: 1px solid transparent;
+      min-height: 42px;
+      cursor: pointer;
+    }
+
+    .primary {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .secondary {
+      background: #ffffff;
+      color: var(--ink);
+      border-color: var(--line);
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .message {
+      min-height: 24px;
+      color: var(--muted);
+    }
+
+    .message.error {
+      color: var(--danger);
+    }
+
+    .message.ok {
+      color: var(--ok);
+    }
+
+    .file-list, .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .file-list span, .pill {
+      border: 1px solid var(--line);
+      background: #f8fafc;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.86rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #ffffff;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: #344054;
+      font-size: 0.86rem;
+      background: #f8fafc;
+    }
+
+    .severity-fatal { color: var(--danger); font-weight: 700; }
+    .severity-warning { color: var(--accent); font-weight: 700; }
+    .severity-info { color: var(--primary); font-weight: 700; }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    select, input[type="number"] {
+      min-height: 40px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      color: var(--ink);
+      padding: 8px 10px;
+    }
+
+    .timetable-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .timetable {
+      min-width: 760px;
+      display: grid;
+    }
+
+    .slot, .head, .period {
+      min-height: 86px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      padding: 10px;
+    }
+
+    .head, .period {
+      background: #f8fafc;
+      font-weight: 700;
+      min-height: 48px;
+    }
+
+    .lesson {
+      border-left: 4px solid var(--primary);
+      background: var(--soft);
+      border-radius: 6px;
+      padding: 8px;
+      margin-bottom: 8px;
+    }
+
+    .lesson strong, .lesson small {
+      display: block;
+    }
+
+    .lesson small {
+      color: var(--muted);
+    }
+
+    progress {
+      width: min(420px, 100%);
+      height: 14px;
+    }
+
+    @media (max-width: 760px) {
+      .shell {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+      }
+
+      main {
+        padding: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">TC</div>
+        <div>
+          <strong>Timetable Creator</strong>
+          <span>Years 7-11</span>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Main navigation">
+        <button class="active" data-page="dashboard">Dashboard</button>
+        <button data-page="upload">Upload</button>
+        <button data-page="validation" disabled>Validation</button>
+        <button data-page="solve" disabled>Solve</button>
+        <button data-page="timetable" disabled>Timetables</button>
+        <button data-page="conflicts" disabled>Conflicts</button>
+        <button data-page="summary" disabled>Summary</button>
+      </nav>
+      <div class="sidebar-footer" id="projectState">No project loaded</div>
+    </aside>
+
+    <main>
+      <section class="page active" id="dashboard">
+        <div class="page-header">
+          <div>
+            <h1>Dashboard</h1>
+            <p class="muted">Load a scenario, validate it, solve it, and export the resulting timetable.</p>
+          </div>
+          <button class="primary" data-page-jump="upload">Upload Scenario</button>
+        </div>
+        <div class="cards" id="dashboardCards">
+          <div class="stat"><span>Project</span><strong>None</strong></div>
+          <div class="stat"><span>Validation</span><strong>-</strong></div>
+          <div class="stat"><span>Solve status</span><strong>-</strong></div>
+        </div>
+      </section>
+
+      <section class="page" id="upload">
+        <div class="page-header">
+          <div>
+            <h1>Upload Scenario</h1>
+            <p class="muted">Use a ZIP archive, a set of CSV files, or a scenario folder.</p>
+          </div>
+          <button class="primary" id="uploadButton">Upload</button>
+        </div>
+        <div class="upload-grid">
+          <label class="upload-target">
+            <strong>ZIP</strong>
+            <span class="muted">One archive containing the scenario CSV files.</span>
+            <input id="zipInput" type="file" accept=".zip" />
+          </label>
+          <label class="upload-target">
+            <strong>CSV files</strong>
+            <span class="muted">Select the required CSV files together.</span>
+            <input id="csvInput" type="file" accept=".csv" multiple />
+          </label>
+          <label class="upload-target">
+            <strong>Folder</strong>
+            <span class="muted">Uses browser folder selection when available.</span>
+            <input id="folderInput" type="file" multiple webkitdirectory directory />
+          </label>
+        </div>
+        <div class="panel">
+          <h2>Selected Files</h2>
+          <div class="file-list" id="selectedFiles"><span>No files selected.</span></div>
+          <p class="message" id="uploadMessage"></p>
+        </div>
+      </section>
+
+      <section class="page" id="validation">
+        <div class="page-header">
+          <div>
+            <h1>Validation</h1>
+            <p class="muted">Fatal issues must be fixed before solving.</p>
+          </div>
+          <button class="primary" id="validateSolveButton">Solve</button>
+        </div>
+        <div class="cards" id="validationCards"></div>
+        <div class="panel">
+          <h2>Issues</h2>
+          <div id="validationTable"></div>
+        </div>
+      </section>
+
+      <section class="page" id="solve">
+        <div class="page-header">
+          <div>
+            <h1>Solve</h1>
+            <p class="muted">Run the heuristic solver for the loaded project.</p>
+          </div>
+          <button class="primary" id="startSolveButton">Start Solve</button>
+        </div>
+        <div class="panel grid">
+          <div class="controls">
+            <label>Mode
+              <select id="solveMode">
+                <option value="quick">Quick</option>
+                <option value="balanced" selected>Balanced</option>
+                <option value="deep">Deep</option>
+              </select>
+            </label>
+            <label>Time limit
+              <input id="timeLimit" type="number" min="5" max="600" value="60" />
+            </label>
+            <label><input id="softConstraints" type="checkbox" checked /> Soft constraints</label>
+          </div>
+          <progress id="solveProgress" max="1" value="0"></progress>
+          <div id="solveStatus" class="message">Not started.</div>
+          <div id="solveMessages" class="pill-list"></div>
+        </div>
+      </section>
+
+      <section class="page" id="timetable">
+        <div class="page-header">
+          <div>
+            <h1>Timetables</h1>
+            <p class="muted">Switch between group, teacher, room, and subject views.</p>
+          </div>
+          <div class="controls" id="timetableControls"></div>
+        </div>
+        <div class="timetable-wrap">
+          <div class="timetable" id="timetableGrid"></div>
+        </div>
+      </section>
+
+      <section class="page" id="conflicts">
+        <div class="page-header">
+          <div>
+            <h1>Conflicts</h1>
+            <p class="muted">Validation warnings, unscheduled lessons, and solver penalties.</p>
+          </div>
+          <button class="secondary" id="refreshConflicts">Refresh</button>
+        </div>
+        <div class="panel" id="conflictList"></div>
+      </section>
+
+      <section class="page" id="summary">
+        <div class="page-header">
+          <div>
+            <h1>Summary</h1>
+            <p class="muted">Teacher load, room utilisation, and export status.</p>
+          </div>
+          <a class="primary" id="exportLink" href="#" style="text-decoration:none; display:inline-flex; align-items:center;">Export ZIP</a>
+        </div>
+        <div class="cards" id="summaryCards"></div>
+        <div class="panel">
+          <h2>Teacher Load</h2>
+          <div id="teacherLoad"></div>
+        </div>
+        <div class="panel">
+          <h2>Room Utilisation</h2>
+          <div id="roomUtilisation"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const state = {
+      project: null,
+      validation: null,
+      solveStatus: null,
+      summary: null,
+      files: [],
+      timetableView: 'group',
+      timetableOption: ''
+    };
+
+    const pages = [...document.querySelectorAll('.page')];
+    const navButtons = [...document.querySelectorAll('[data-page]')];
+
+    function esc(value) {
+      return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      })[char]);
+    }
+
+    async function api(path, init) {
+      const response = await fetch(`/api${path}`, init);
+      if (!response.ok) {
+        let detail = await response.text();
+        try {
+          const parsed = JSON.parse(detail);
+          detail = parsed.detail || detail;
+        } catch (_) {}
+        throw new Error(detail || `Request failed with status ${response.status}`);
+      }
+      if (response.status === 204) return null;
+      return response.json();
+    }
+
+    function showPage(id) {
+      pages.forEach((page) => page.classList.toggle('active', page.id === id));
+      navButtons.forEach((button) => button.classList.toggle('active', button.dataset.page === id));
+      if (id === 'summary' && state.project) loadSummary();
+      if (id === 'conflicts' && state.project) loadConflicts();
+      if (id === 'timetable' && state.project) loadTimetable();
+    }
+
+    function setProjectEnabled(enabled) {
+      navButtons.forEach((button) => {
+        if (!['dashboard', 'upload'].includes(button.dataset.page)) {
+          button.disabled = !enabled;
+        }
+      });
+    }
+
+    function updateProjectState() {
+      const projectState = document.getElementById('projectState');
+      if (!state.project) {
+        projectState.textContent = 'No project loaded';
+        setProjectEnabled(false);
+      } else {
+        projectState.textContent = `${state.project.source_scenario} (${state.project.project_id})`;
+        setProjectEnabled(true);
+      }
+      renderDashboard();
+    }
+
+    function renderDashboard() {
+      const validation = state.validation?.summary || state.project?.validation;
+      const status = state.solveStatus?.status || state.summary?.solve_status || '-';
+      document.getElementById('dashboardCards').innerHTML = `
+        <div class="stat"><span>Project</span><strong>${esc(state.project?.source_scenario || 'None')}</strong></div>
+        <div class="stat"><span>Validation</span><strong>${validation ? `${validation.fatal} fatal` : '-'}</strong></div>
+        <div class="stat"><span>Solve status</span><strong>${esc(status)}</strong></div>
+      `;
+    }
+
+    function setMessage(id, text, kind = '') {
+      const el = document.getElementById(id);
+      el.className = `message ${kind}`.trim();
+      el.textContent = text;
+    }
+
+    function handleFileSelection(event) {
+      state.files = [...event.target.files];
+      for (const input of ['zipInput', 'csvInput', 'folderInput']) {
+        if (event.target.id !== input) document.getElementById(input).value = '';
+      }
+      const list = document.getElementById('selectedFiles');
+      if (!state.files.length) {
+        list.innerHTML = '<span>No files selected.</span>';
+        return;
+      }
+      list.innerHTML = state.files.slice(0, 16).map((file) =>
+        `<span>${esc(file.webkitRelativePath || file.name)}</span>`
+      ).join('') + (state.files.length > 16 ? `<span>+${state.files.length - 16} more</span>` : '');
+    }
+
+    async function uploadProject() {
+      if (!state.files.length) {
+        setMessage('uploadMessage', 'Choose a ZIP file, CSV files, or a scenario folder.', 'error');
+        return;
+      }
+      const button = document.getElementById('uploadButton');
+      button.disabled = true;
+      setMessage('uploadMessage', 'Uploading...');
+      try {
+        const formData = new FormData();
+        state.files.forEach((file) => formData.append('files', file));
+        state.project = await api('/projects/upload', { method: 'POST', body: formData });
+        state.validation = null;
+        state.solveStatus = null;
+        state.summary = null;
+        setMessage('uploadMessage', 'Project loaded.', 'ok');
+        updateProjectState();
+        await loadValidation();
+        showPage('validation');
+      } catch (error) {
+        setMessage('uploadMessage', error.message, 'error');
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    async function loadValidation() {
+      if (!state.project) return;
+      state.validation = await api(`/projects/${state.project.project_id}/validation`);
+      renderValidation();
+      renderDashboard();
+    }
+
+    function renderValidation() {
+      const data = state.validation;
+      if (!data) return;
+      document.getElementById('validationCards').innerHTML = `
+        <div class="stat"><span>Fatal</span><strong>${data.summary.fatal}</strong></div>
+        <div class="stat"><span>Warnings</span><strong>${data.summary.warning}</strong></div>
+        <div class="stat"><span>Info</span><strong>${data.summary.info}</strong></div>
+        <div class="stat"><span>Can solve</span><strong>${data.can_solve ? 'Yes' : 'No'}</strong></div>
+      `;
+      document.getElementById('validateSolveButton').disabled = !data.can_solve;
+      if (!data.issues.length) {
+        document.getElementById('validationTable').innerHTML = '<p class="muted">No validation issues found.</p>';
+        return;
+      }
+      document.getElementById('validationTable').innerHTML = `
+        <table>
+          <thead><tr><th>Severity</th><th>Category</th><th>File</th><th>Message</th></tr></thead>
+          <tbody>
+            ${data.issues.map((issue) => `
+              <tr>
+                <td class="severity-${esc(issue.severity)}">${esc(issue.severity)}</td>
+                <td>${esc(issue.category)}</td>
+                <td>${esc(issue.file || '')}${issue.row ? ` row ${issue.row}` : ''}</td>
+                <td>${esc(issue.message)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    async function startSolve() {
+      if (!state.project) return;
+      const button = document.getElementById('startSolveButton');
+      button.disabled = true;
+      const settings = {
+        mode: document.getElementById('solveMode').value,
+        time_limit_seconds: Number(document.getElementById('timeLimit').value || 60),
+        soft_constraints_enabled: document.getElementById('softConstraints').checked
+      };
+      try {
+        state.solveStatus = await api(`/projects/${state.project.project_id}/solve`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(settings)
+        });
+        renderSolveStatus();
+        await pollSolve();
+      } catch (error) {
+        setMessage('solveStatus', error.message, 'error');
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    async function pollSolve() {
+      if (!state.project) return;
+      for (let count = 0; count < 120; count += 1) {
+        state.solveStatus = await api(`/projects/${state.project.project_id}/solve-status`);
+        renderSolveStatus();
+        renderDashboard();
+        if (!['queued', 'running'].includes(state.solveStatus.status)) {
+          await loadSummary().catch(() => undefined);
+          await loadTimetable().catch(() => undefined);
+          return;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    }
+
+    function renderSolveStatus() {
+      const status = state.solveStatus || { status: 'not_started', progress: 0, messages: [] };
+      document.getElementById('solveProgress').value = status.progress || 0;
+      setMessage('solveStatus', `${status.status}${status.score != null ? `, score ${status.score}` : ''}`);
+      document.getElementById('solveMessages').innerHTML = (status.messages || []).map((message) =>
+        `<span class="pill">${esc(message)}</span>`
+      ).join('');
+    }
+
+    async function loadSummary() {
+      if (!state.project) return;
+      state.summary = await api(`/projects/${state.project.project_id}/summary`);
+      renderSummary();
+      renderDashboard();
+    }
+
+    function renderSummary() {
+      const data = state.summary;
+      if (!data) return;
+      document.getElementById('exportLink').href = `/api/projects/${state.project.project_id}/export`;
+      document.getElementById('summaryCards').innerHTML = `
+        <div class="stat"><span>Scheduled</span><strong>${data.scheduled_lessons}</strong></div>
+        <div class="stat"><span>Unscheduled</span><strong>${data.unscheduled_lessons}</strong></div>
+        <div class="stat"><span>Warnings</span><strong>${data.warnings}</strong></div>
+        <div class="stat"><span>Score</span><strong>${data.optimisation_score ?? '-'}</strong></div>
+      `;
+      document.getElementById('teacherLoad').innerHTML = renderTable(
+        ['Teacher', 'Department', 'Lessons', 'Weekly max'],
+        data.teacher_load.map((row) => [row.teacher_name, row.department, row.total_lessons, row.max_lessons_per_week])
+      );
+      document.getElementById('roomUtilisation').innerHTML = renderTable(
+        ['Room', 'Type', 'Scheduled', 'Available', 'Utilisation'],
+        data.room_utilisation.map((row) => [row.room_name, row.room_type, row.scheduled_lessons, row.available_slots, `${row.utilisation_percent}%`])
+      );
+    }
+
+    async function loadTimetable() {
+      if (!state.project) return;
+      const params = new URLSearchParams({ view: state.timetableView });
+      if (state.timetableOption) params.set('id', state.timetableOption);
+      const data = await api(`/projects/${state.project.project_id}/timetable?${params.toString()}`);
+      state.timetableOption = data.selected_id;
+      renderTimetable(data);
+    }
+
+    function renderTimetable(data) {
+      const controls = document.getElementById('timetableControls');
+      controls.innerHTML = `
+        <label>View
+          <select id="viewSelect">
+            ${['group', 'teacher', 'room', 'subject'].map((view) => `<option value="${view}" ${view === state.timetableView ? 'selected' : ''}>${view}</option>`).join('')}
+          </select>
+        </label>
+        <label>Selection
+          <select id="optionSelect">
+            ${data.options.map((option) => `<option value="${esc(option.id)}" ${option.id === data.selected_id ? 'selected' : ''}>${esc(option.label)}</option>`).join('')}
+          </select>
+        </label>
+      `;
+      document.getElementById('viewSelect').addEventListener('change', (event) => {
+        state.timetableView = event.target.value;
+        state.timetableOption = '';
+        loadTimetable();
+      });
+      document.getElementById('optionSelect').addEventListener('change', (event) => {
+        state.timetableOption = event.target.value;
+        loadTimetable();
+      });
+
+      const grid = document.getElementById('timetableGrid');
+      grid.style.gridTemplateColumns = `110px repeat(${data.days.length}, minmax(130px, 1fr))`;
+      grid.innerHTML = `<div class="head">Period</div>${data.days.map((day) => `<div class="head">${esc(day)}</div>`).join('')}` +
+        data.periods.map((period) => `
+          <div class="period">${esc(period)}</div>
+          ${data.days.map((day) => {
+            const lessons = data.cells[`${day}-${period}`] || [];
+            return `<div class="slot">${lessons.map(renderLesson).join('') || '<span class="muted">Empty</span>'}</div>`;
+          }).join('')}
+        `).join('');
+    }
+
+    function renderLesson(lesson) {
+      return `
+        <div class="lesson">
+          <strong>${esc(lesson.subject)}</strong>
+          <small>${esc(lesson.group_id)} / ${esc(lesson.teacher_id)} / ${esc(lesson.room_id)}</small>
+        </div>
+      `;
+    }
+
+    async function loadConflicts() {
+      if (!state.project) return;
+      const data = await api(`/projects/${state.project.project_id}/conflicts`);
+      const groups = [
+        ['Fatal validation', data.validation_fatals],
+        ['Validation warnings', data.validation_warnings],
+        ['Unscheduled lessons', data.unscheduled_lessons],
+        ['Broken hard constraints', data.broken_hard_constraints],
+        ['Soft penalties', data.soft_penalties]
+      ];
+      document.getElementById('conflictList').innerHTML = groups.map(([title, items]) => `
+        <h2>${esc(title)}</h2>
+        ${items.length ? renderTable(['Severity', 'Category', 'Message'], items.map((item) => [item.severity, item.category, item.message])) : '<p class="muted">None.</p>'}
+      `).join('');
+    }
+
+    function renderTable(headers, rows) {
+      if (!rows.length) return '<p class="muted">No rows.</p>';
+      return `
+        <table>
+          <thead><tr>${headers.map((header) => `<th>${esc(header)}</th>`).join('')}</tr></thead>
+          <tbody>${rows.map((row) => `<tr>${row.map((cell) => `<td>${esc(cell)}</td>`).join('')}</tr>`).join('')}</tbody>
+        </table>
+      `;
+    }
+
+    navButtons.forEach((button) => button.addEventListener('click', () => showPage(button.dataset.page)));
+    document.querySelectorAll('[data-page-jump]').forEach((button) => button.addEventListener('click', () => showPage(button.dataset.pageJump)));
+    ['zipInput', 'csvInput', 'folderInput'].forEach((id) => document.getElementById(id).addEventListener('change', handleFileSelection));
+    document.getElementById('uploadButton').addEventListener('click', uploadProject);
+    document.getElementById('validateSolveButton').addEventListener('click', () => showPage('solve'));
+    document.getElementById('startSolveButton').addEventListener('click', startSolve);
+    document.getElementById('refreshConflicts').addEventListener('click', loadConflicts);
+    updateProjectState();
+  </script>
+</body>
+</html>
