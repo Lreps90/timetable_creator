@@ -9,10 +9,21 @@ from fastapi.responses import StreamingResponse
 
 from backend.app.data.csv_loader import load_project_from_files, load_project_from_zip_bytes
 from backend.app.exports.csv_exporter import build_export_zip
-from backend.app.models.entities import SolveSettings, SolveStatus
+from backend.app.models.entities import SolveResult, SolveSettings, SolveStatus
 from backend.app.models.project import ProjectData
 from backend.app.solver.heuristic_solver import solve_project
-from backend.app.state import get_project, reset_project, store_project
+from backend.app.state import (
+    ProjectSolveAlreadyActiveError,
+    ProjectSolveValidationError,
+    claim_project_solve,
+    complete_project_solve,
+    fail_project_solve,
+    get_project,
+    mark_project_solve_running,
+    reset_project,
+    store_project,
+    update_project_solve_progress,
+)
 
 
 router = APIRouter(prefix="/api")
@@ -54,12 +65,18 @@ def validation(project_id: str) -> dict:
 
 @router.post("/projects/{project_id}/solve")
 def start_solve(project_id: str, settings: SolveSettings, background_tasks: BackgroundTasks) -> SolveStatus:
-    project = _project_or_404(project_id)
-    if project.fatal_validation_issues:
+    try:
+        project = claim_project_solve(project_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Project not found.") from exc
+    except ProjectSolveValidationError as exc:
         raise HTTPException(status_code=400, detail="Fix fatal validation errors before solving.")
+    except ProjectSolveAlreadyActiveError as exc:
+        raise HTTPException(
+            status_code=409,
+            detail="A timetable solve is already queued or running for this project.",
+        ) from exc
 
-    project.solve_status = SolveStatus(status="queued", progress=0.0, messages=["Solve queued."])
-    project.solve_result = None
     background_tasks.add_task(_run_solver, project_id, settings)
     return project.solve_status
 
@@ -120,8 +137,10 @@ def summary(project_id: str) -> dict:
 @router.get("/projects/{project_id}/export")
 def export(project_id: str) -> StreamingResponse:
     project = _project_or_404(project_id)
-    if project.solve_result is None:
+    result = project.solve_result
+    if result is None:
         raise HTTPException(status_code=400, detail="Solve the project before exporting.")
+    _ensure_result_is_exportable(result, project.solve_status)
     zip_buffer = build_export_zip(project)
     filename = f"{project.source_scenario or project.project_id}_timetable_exports.zip"
     return StreamingResponse(
@@ -131,6 +150,29 @@ def export(project_id: str) -> StreamingResponse:
     )
 
 
+def _ensure_result_is_exportable(result: SolveResult, solve_status: SolveStatus) -> None:
+    reasons: list[str] = []
+    if solve_status.status != "feasible":
+        reasons.append(f"the recorded solve status is {solve_status.status}")
+    if result.status != "feasible":
+        reasons.append(f"the solve result is {result.status}")
+    if result.unscheduled_lessons:
+        count = len(result.unscheduled_lessons)
+        reasons.append(f"{count} lesson{' remains' if count == 1 else 's remain'} unscheduled")
+    if result.broken_hard_constraints:
+        count = len(result.broken_hard_constraints)
+        reasons.append(f"{count} verified hard-constraint violation{' remains' if count == 1 else 's remain'}")
+
+    if reasons:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "The timetable cannot be exported because "
+                f"{' and '.join(reasons)}. Review the conflict report before exporting."
+            ),
+        )
+
+
 @router.delete("/projects/{project_id}")
 def reset(project_id: str) -> dict:
     reset_project(project_id)
@@ -138,29 +180,19 @@ def reset(project_id: str) -> dict:
 
 
 def _run_solver(project_id: str, settings: SolveSettings) -> None:
-    project = get_project(project_id)
-    project.solve_status = SolveStatus(status="running", progress=0.01, messages=["Solving started."])
-
-    def progress(progress_value: float, messages: list[str]) -> None:
-        project.solve_status = SolveStatus(
-            status="running",
-            progress=progress_value,
-            messages=messages,
-        )
-
     try:
+        project = get_project(project_id)
+        mark_project_solve_running(project_id)
+
+        def progress(progress_value: float, messages: list[str]) -> None:
+            update_project_solve_progress(project_id, progress_value, messages)
+
         result = solve_project(project, settings, progress_callback=progress)
     except Exception as exc:  # pragma: no cover - defensive status path
-        project.solve_status = SolveStatus(status="failed", progress=1.0, messages=[str(exc)])
+        fail_project_solve(project_id, str(exc))
         raise
 
-    project.solve_result = result
-    project.solve_status = SolveStatus(
-        status=result.status,
-        progress=1.0,
-        score=result.score,
-        messages=result.messages,
-    )
+    complete_project_solve(project_id, result)
 
 
 def build_summary(project: ProjectData) -> dict:

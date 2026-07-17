@@ -112,6 +112,7 @@ class FixedEvent(BaseModel):
     duration_periods: int = 1
     required_teacher_ids: list[str] = Field(default_factory=list)
     required_room_ids: list[str] = Field(default_factory=list)
+    source_row: int | None = Field(default=None, exclude=True)
     notes: str = ""
 
 
@@ -130,6 +131,7 @@ class Constraint(BaseModel):
     constraint_type: Literal["HARD", "SOFT"]
     weight: int = 1
     enabled: bool = True
+    source_row: int | None = Field(default=None, exclude=True)
     description: str = ""
 
 

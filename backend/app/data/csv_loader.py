@@ -3,7 +3,9 @@ from __future__ import annotations
 import csv
 import io
 import zipfile
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Any, Callable
 from uuid import uuid4
 
 from pydantic import ValidationError
@@ -131,6 +133,12 @@ REQUIRED_COLUMNS: dict[str, list[str]] = {
 }
 
 
+@dataclass(frozen=True)
+class _InvalidPrimitive:
+    value: str
+    expected_type: str
+
+
 def load_project_from_folder(folder: str | Path, project_id: str | None = None) -> ProjectData:
     root = Path(folder)
     raw_files: dict[str, bytes] = {}
@@ -249,18 +257,32 @@ def _read_csv(filename: str, content: bytes, issues: list[ValidationIssue]) -> l
 
 def _load_school_structure(project: ProjectData, rows: list[dict[str, str]]) -> None:
     values = {row.get("key", "").strip(): row.get("value", "").strip() for row in rows if row.get("key")}
+    rows_by_key = {row.get("key", "").strip(): row for row in rows if row.get("key")}
     days = _split_pipe(values.get("days")) or ["Mon", "Tue", "Wed", "Thu", "Fri"]
-    periods = _split_pipe(values.get("periods")) or [f"P{i}" for i in range(1, _int(values.get("periods_per_day"), 5) + 1)]
+    days_per_week = _int(values.get("days_per_week"), len(days))
+    periods_per_day = _int(values.get("periods_per_day"), 5)
+    cycle_weeks = _int(values.get("cycle_weeks"), 1)
+    primitive_values = {
+        "days_per_week": days_per_week,
+        "periods_per_day": periods_per_day,
+        "cycle_weeks": cycle_weeks,
+    }
+    for field, invalid in _invalid_primitives(primitive_values):
+        _append_invalid_primitive_issue(project, "school_structure.csv", rows_by_key.get(field, {}), field, invalid)
+
+    safe_periods_per_day = periods_per_day if isinstance(periods_per_day, int) else 5
+    periods = _split_pipe(values.get("periods")) or [f"P{i}" for i in range(1, safe_periods_per_day + 1)]
     project.school = SchoolStructure(
-        days_per_week=_int(values.get("days_per_week"), len(days)),
-        periods_per_day=_int(values.get("periods_per_day"), len(periods)),
-        cycle_weeks=_int(values.get("cycle_weeks"), 1),
+        days_per_week=days_per_week if isinstance(days_per_week, int) else len(days),
+        periods_per_day=periods_per_day if isinstance(periods_per_day, int) else len(periods),
+        cycle_weeks=cycle_weeks if isinstance(cycle_weeks, int) else 1,
         days=days,
         periods=periods,
     )
 
 
 def _load_teachers(project: ProjectData, rows: list[dict[str, str]]) -> None:
+    seen_keys: dict[str, int] = {}
     for row in rows:
         _add_model(
             project,
@@ -279,6 +301,9 @@ def _load_teachers(project: ProjectData, rows: list[dict[str, str]]) -> None:
                 "notes": row.get("notes", ""),
             },
             lambda model: project.teachers.__setitem__(model.teacher_id, model),
+            key_getter=lambda model: model.teacher_id,
+            seen_keys=seen_keys,
+            key_field="teacher_id",
         )
 
 
@@ -301,6 +326,7 @@ def _load_teacher_subjects(project: ProjectData, rows: list[dict[str, str]]) -> 
 
 
 def _load_subjects(project: ProjectData, rows: list[dict[str, str]]) -> None:
+    seen_keys: dict[str, int] = {}
     for row in rows:
         _add_model(
             project,
@@ -314,6 +340,9 @@ def _load_subjects(project: ProjectData, rows: list[dict[str, str]]) -> None:
                 "default_room_type": row.get("default_room_type", "General") or "General",
             },
             lambda model: project.subjects.__setitem__(model.subject, model),
+            key_getter=lambda model: model.subject,
+            seen_keys=seen_keys,
+            key_field="subject",
         )
 
 
@@ -335,6 +364,7 @@ def _load_curriculum(project: ProjectData, rows: list[dict[str, str]]) -> None:
 
 
 def _load_teaching_groups(project: ProjectData, rows: list[dict[str, str]]) -> None:
+    seen_keys: dict[str, int] = {}
     for row in rows:
         _add_model(
             project,
@@ -354,10 +384,14 @@ def _load_teaching_groups(project: ProjectData, rows: list[dict[str, str]]) -> N
                 "notes": row.get("notes", ""),
             },
             lambda model: project.teaching_groups.__setitem__(model.group_id, model),
+            key_getter=lambda model: model.group_id,
+            seen_keys=seen_keys,
+            key_field="group_id",
         )
 
 
 def _load_rooms(project: ProjectData, rows: list[dict[str, str]]) -> None:
+    seen_keys: dict[str, int] = {}
     for row in rows:
         room_type = row.get("room_type", "General") or "General"
         capacity = _int(row.get("capacity"), 0)
@@ -383,10 +417,14 @@ def _load_rooms(project: ProjectData, rows: list[dict[str, str]]) -> None:
                 "notes": row.get("notes", ""),
             },
             lambda model: project.rooms.__setitem__(model.room_id, model),
+            key_getter=lambda model: model.room_id,
+            seen_keys=seen_keys,
+            key_field="room_id",
         )
 
 
 def _load_subject_room_requirements(project: ProjectData, rows: list[dict[str, str]]) -> None:
+    seen_keys: dict[str, int] = {}
     for row in rows:
         if not row.get("subject"):
             continue
@@ -402,6 +440,9 @@ def _load_subject_room_requirements(project: ProjectData, rows: list[dict[str, s
                 "notes": row.get("notes", ""),
             },
             lambda model: project.subject_room_requirements.__setitem__(model.subject, model),
+            key_getter=lambda model: model.subject,
+            seen_keys=seen_keys,
+            key_field="subject",
         )
 
 
@@ -427,9 +468,8 @@ def _load_option_blocks(project: ProjectData, rows: list[dict[str, str]]) -> Non
 
 
 def _load_fixed_events(project: ProjectData, rows: list[dict[str, str]]) -> None:
+    seen_keys: dict[str, int] = {}
     for row in rows:
-        if not row.get("event_id"):
-            continue
         _add_model(
             project,
             "fixed_events.csv",
@@ -445,9 +485,13 @@ def _load_fixed_events(project: ProjectData, rows: list[dict[str, str]]) -> None
                 "duration_periods": _int(row.get("duration_periods"), 1),
                 "required_teacher_ids": _split_pipe(row.get("required_teacher_ids")),
                 "required_room_ids": _split_pipe(row.get("required_room_ids")),
+                "source_row": _row_number(row),
                 "notes": row.get("notes", ""),
             },
             project.fixed_events.append,
+            key_getter=lambda model: model.event_id,
+            seen_keys=seen_keys,
+            key_field="event_id",
         )
 
 
@@ -474,6 +518,7 @@ def _load_lesson_patterns(project: ProjectData, rows: list[dict[str, str]]) -> N
 
 
 def _load_constraints(project: ProjectData, rows: list[dict[str, str]]) -> None:
+    seen_keys: dict[str, int] = {}
     for row in rows:
         if not row.get("constraint_name"):
             continue
@@ -488,13 +533,32 @@ def _load_constraints(project: ProjectData, rows: list[dict[str, str]]) -> None:
                 "constraint_type": constraint_type,
                 "weight": _int(row.get("weight"), 1),
                 "enabled": _bool(row.get("enabled"), True),
+                "source_row": _row_number(row),
                 "description": row.get("description", ""),
             },
             lambda model: project.constraints.__setitem__(model.constraint_name, model),
+            key_getter=lambda model: model.constraint_name,
+            seen_keys=seen_keys,
+            key_field="constraint_name",
         )
 
 
-def _add_model(project: ProjectData, filename: str, row: dict[str, str], model_type, values: dict, add) -> None:
+def _add_model(
+    project: ProjectData,
+    filename: str,
+    row: dict[str, str],
+    model_type,
+    values: dict[str, Any],
+    add: Callable[[Any], None],
+    key_getter: Callable[[Any], str] | None = None,
+    seen_keys: dict[str, int] | None = None,
+    key_field: str | None = None,
+) -> None:
+    for field, invalid in _invalid_primitives(values):
+        _append_invalid_primitive_issue(project, filename, row, field, invalid)
+    if any(True for _field, _invalid in _invalid_primitives(values)):
+        return
+
     try:
         model = model_type(**values)
     except ValidationError as exc:
@@ -508,7 +572,56 @@ def _add_model(project: ProjectData, filename: str, row: dict[str, str], model_t
             )
         )
         return
+
+    if key_getter is not None and seen_keys is not None and key_field is not None:
+        key = key_getter(model)
+        previous_row = seen_keys.get(key)
+        if previous_row is not None:
+            project.validation_issues.append(
+                ValidationIssue(
+                    file=filename,
+                    row=_row_number(row),
+                    field=key_field,
+                    severity="fatal",
+                    category="duplicate_identifier",
+                    message=(
+                        f"Duplicate {key_field} {key!r} in {filename} at row "
+                        f"{_row_number(row)}; first declared at row {previous_row}."
+                    ),
+                )
+            )
+            return
+        seen_keys[key] = _row_number(row) or 0
     add(model)
+
+
+def _invalid_primitives(values: dict[str, Any]):
+    for field, value in values.items():
+        if isinstance(value, _InvalidPrimitive):
+            yield field, value
+        elif isinstance(value, list):
+            for item in value:
+                if isinstance(item, _InvalidPrimitive):
+                    yield field, item
+
+
+def _append_invalid_primitive_issue(
+    project: ProjectData,
+    filename: str,
+    row: dict[str, str],
+    field: str,
+    invalid: _InvalidPrimitive,
+) -> None:
+    project.validation_issues.append(
+        ValidationIssue(
+            file=filename,
+            row=_row_number(row),
+            field=field,
+            severity="fatal",
+            category="invalid_primitive",
+            message=f"Invalid {invalid.expected_type} value {invalid.value!r} for {field} in {filename}.",
+        )
+    )
 
 
 def _split_pipe(value: str | None) -> list[str]:
@@ -518,28 +631,33 @@ def _split_pipe(value: str | None) -> list[str]:
     return [part.strip() for part in normalized.split("|") if part.strip()]
 
 
-def _bool(value: str | None, default: bool = False) -> bool:
+def _bool(value: str | None, default: bool = False) -> bool | _InvalidPrimitive:
     if value is None or value == "":
         return default
-    return value.strip().lower() in {"1", "true", "yes", "y", "t"}
+    normalized = value.strip().lower()
+    if normalized in {"1", "true", "yes", "y", "t"}:
+        return True
+    if normalized in {"0", "false", "no", "n", "f"}:
+        return False
+    return _InvalidPrimitive(value=value, expected_type="boolean")
 
 
-def _int(value: str | None, default: int) -> int:
+def _int(value: str | None, default: int) -> int | _InvalidPrimitive:
     if value is None or value == "":
         return default
     try:
         return int(value)
     except ValueError:
-        return default
+        return _InvalidPrimitive(value=value, expected_type="integer")
 
 
-def _optional_int(value: str | None) -> int | None:
+def _optional_int(value: str | None) -> int | None | _InvalidPrimitive:
     if value is None or value == "":
         return None
     try:
         return int(value)
     except ValueError:
-        return None
+        return _InvalidPrimitive(value=value, expected_type="integer")
 
 
 def _room_type_has_computers(room_type: str) -> bool:

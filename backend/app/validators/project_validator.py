@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from dataclasses import dataclass
 
+from backend.app.constraint_policy import CONSTRAINT_DEFINITIONS
 from backend.app.models.entities import (
+    CurriculumRow,
+    FixedEvent,
     Room,
     Teacher,
     TeachingGroup,
@@ -16,10 +20,87 @@ def validate_project(project: ProjectData) -> list[ValidationIssue]:
     issues.extend(_validate_school_structure(project))
     issues.extend(_validate_required_ids(project))
     issues.extend(_validate_references(project))
+    issues.extend(_validate_curriculum_alignment(project))
     issues.extend(_validate_group_feasibility(project))
     issues.extend(_validate_teacher_load_capacity(project))
     issues.extend(_validate_option_blocks(project))
     issues.extend(_validate_fixed_events(project))
+    issues.extend(_validate_constraints(project))
+    return issues
+
+
+def _validate_curriculum_alignment(project: ProjectData) -> list[ValidationIssue]:
+    """Keep solver demand from teaching_groups.csv aligned with the curriculum plan."""
+    # teaching_groups.csv remains the operational source of solver demand. curriculum.csv
+    # validates that demand; this milestone does not create groups from curriculum rows.
+    issues: list[ValidationIssue] = []
+    curriculum_by_key: dict[tuple[int, str], list[tuple[int, CurriculumRow]]] = defaultdict(list)
+    groups_by_key: dict[tuple[int, str], list[tuple[int, TeachingGroup]]] = defaultdict(list)
+
+    for row_number, curriculum in enumerate(project.curriculum, start=2):
+        curriculum_by_key[(curriculum.year_group, curriculum.subject)].append((row_number, curriculum))
+    for row_number, group in enumerate(project.teaching_groups.values(), start=2):
+        groups_by_key[(group.year_group, group.subject)].append((row_number, group))
+
+    for (year_group, subject), rows in curriculum_by_key.items():
+        if len(rows) > 1:
+            first_row = rows[0][0]
+            for row_number, curriculum in rows[1:]:
+                issues.append(
+                    _fatal(
+                        "curriculum.csv",
+                        "subject",
+                        "curriculum_mismatch",
+                        f"Duplicate curriculum row for Year {year_group} {subject} at row {row_number}; "
+                        f"first declared at row {first_row}. Expected {curriculum.lessons_per_week} lessons per week per group.",
+                        row=row_number,
+                    )
+                )
+
+        row_number, curriculum = rows[0]
+        matching_groups = groups_by_key.get((year_group, subject), [])
+        if not matching_groups:
+            issues.append(
+                _fatal(
+                    "curriculum.csv",
+                    "lessons_per_week",
+                    "curriculum_mismatch",
+                    f"Year {year_group} {subject} requires {curriculum.lessons_per_week} lessons per week, "
+                    "but no matching teaching groups exist.",
+                    row=row_number,
+                )
+            )
+            continue
+
+        total_lessons = sum(group.lessons_per_week for _group_row, group in matching_groups)
+        for group_row, group in matching_groups:
+            if group.lessons_per_week != curriculum.lessons_per_week:
+                issues.append(
+                    _fatal(
+                        "teaching_groups.csv",
+                        "lessons_per_week",
+                        "curriculum_mismatch",
+                        f"Year {year_group} {subject} curriculum expects {curriculum.lessons_per_week} lessons per week "
+                        f"per group, but {group.group_id} requests {group.lessons_per_week} (matching groups total "
+                        f"{total_lessons} lessons per week).",
+                        row=group_row,
+                    )
+                )
+
+    for (year_group, subject), groups in groups_by_key.items():
+        if (year_group, subject) in curriculum_by_key:
+            continue
+        for _row_number, group in groups:
+            issues.append(
+                _fatal(
+                    "teaching_groups.csv",
+                    "subject",
+                    "curriculum_mismatch",
+                    f"Teaching group {group.group_id} requests {group.lessons_per_week} lessons per week for "
+                    f"Year {year_group} {subject}, but no matching curriculum row exists.",
+                    row=_row_number,
+                )
+            )
     return issues
 
 
@@ -240,27 +321,6 @@ def _validate_references(project: ProjectData) -> list[ValidationIssue]:
                 )
             )
 
-    for event in project.fixed_events:
-        for teacher_id in event.required_teacher_ids:
-            if teacher_id not in teacher_ids:
-                issues.append(
-                    _fatal(
-                        "fixed_events.csv",
-                        "required_teacher_ids",
-                        "invalid_reference",
-                        f"Fixed event {event.event_id} references unknown teacher {teacher_id}.",
-                    )
-                )
-        for room_id in event.required_room_ids:
-            if room_id not in room_ids:
-                issues.append(
-                    _fatal(
-                        "fixed_events.csv",
-                        "required_room_ids",
-                        "invalid_reference",
-                        f"Fixed event {event.event_id} references unknown room {room_id}.",
-                    )
-                )
     return issues
 
 
@@ -409,17 +469,87 @@ def _validate_option_blocks(project: ProjectData) -> list[ValidationIssue]:
     return issues
 
 
+@dataclass(frozen=True)
+class FixedEventTargets:
+    teacher_ids: frozenset[str]
+    room_ids: frozenset[str]
+    group_ids: frozenset[str]
+    year_groups: frozenset[int]
+
+
+def resolve_fixed_event_targets(project: ProjectData, event: FixedEvent) -> FixedEventTargets | None:
+    teacher_ids = set(event.required_teacher_ids)
+    room_ids = set(event.required_room_ids)
+    group_ids: set[str] = set()
+    year_groups: set[int] = set()
+    applies_to = event.applies_to
+
+    if applies_to == "ALL_STAFF":
+        teacher_ids.update(project.teachers)
+    elif applies_to == "SLT":
+        teacher_ids.update(
+            teacher.teacher_id
+            for teacher in project.teachers.values()
+            if "slt" in teacher.role.lower() or "senior" in teacher.role.lower()
+        )
+    elif applies_to:
+        matches: list[tuple[str, str | int]] = []
+        if applies_to in project.teachers:
+            matches.append(("teacher", applies_to))
+        if applies_to in project.rooms:
+            matches.append(("room", applies_to))
+        if applies_to in project.teaching_groups:
+            matches.append(("group", applies_to))
+        year_groups_in_project = {group.year_group for group in project.teaching_groups.values()}
+        if applies_to.startswith("Y") and applies_to[1:].isdigit():
+            year_group = int(applies_to[1:])
+            if year_group in year_groups_in_project:
+                matches.append(("year_group", year_group))
+        elif applies_to.isdigit():
+            year_group = int(applies_to)
+            if year_group in year_groups_in_project:
+                matches.append(("year_group", year_group))
+        if len(matches) != 1:
+            return None
+        target_type, target_id = matches[0]
+        if target_type == "teacher":
+            teacher_ids.add(str(target_id))
+        elif target_type == "room":
+            room_ids.add(str(target_id))
+        elif target_type == "group":
+            group_ids.add(str(target_id))
+        else:
+            year_groups.add(int(target_id))
+
+    return FixedEventTargets(
+        teacher_ids=frozenset(teacher_ids),
+        room_ids=frozenset(room_ids),
+        group_ids=frozenset(group_ids),
+        year_groups=frozenset(year_groups),
+    )
+
+
+def fixed_event_periods(project: ProjectData, event: FixedEvent) -> tuple[str, ...]:
+    period_index = {period: index for index, period in enumerate(project.school.periods)}
+    start = period_index.get(event.period)
+    if start is None or event.duration_periods <= 0:
+        return ()
+    end = start + event.duration_periods
+    if end > len(project.school.periods):
+        return ()
+    return tuple(project.school.periods[start:end])
+
+
 def _validate_fixed_events(project: ProjectData) -> list[ValidationIssue]:
     issues: list[ValidationIssue] = []
     valid_days = set(project.school.days)
     valid_periods = set(project.school.periods)
     period_index = {period: index for index, period in enumerate(project.school.periods)}
-    known_applies_to = set(project.teachers) | set(project.rooms) | {group.group_id for group in project.teaching_groups.values()}
-    known_applies_to |= {"ALL_STAFF", "SLT"}
-    known_applies_to |= {f"Y{year}" for year in range(7, 14)}
-    known_applies_to |= {str(year) for year in range(7, 14)}
 
     for event in project.fixed_events:
+        row = event.source_row
+        if not event.event_id:
+            issues.append(_fatal("fixed_events.csv", "event_id", "schema", "Fixed event rows must include event_id.", row=row))
         if event.day not in valid_days:
             issues.append(
                 _fatal(
@@ -427,6 +557,7 @@ def _validate_fixed_events(project: ProjectData) -> list[ValidationIssue]:
                     "day",
                     "invalid_reference",
                     f"Fixed event {event.event_id} uses unknown day {event.day}.",
+                    row=row,
                 )
             )
         if event.period not in valid_periods:
@@ -436,6 +567,17 @@ def _validate_fixed_events(project: ProjectData) -> list[ValidationIssue]:
                     "period",
                     "invalid_reference",
                     f"Fixed event {event.event_id} uses unknown period {event.period}.",
+                    row=row,
+                )
+            )
+        elif event.duration_periods <= 0:
+            issues.append(
+                _fatal(
+                    "fixed_events.csv",
+                    "duration_periods",
+                    "fixed_event_duration",
+                    f"Fixed event {event.event_id} must have a positive duration_periods value; got {event.duration_periods}.",
+                    row=row,
                 )
             )
         elif period_index[event.period] + event.duration_periods > len(project.school.periods):
@@ -443,21 +585,87 @@ def _validate_fixed_events(project: ProjectData) -> list[ValidationIssue]:
                 _fatal(
                     "fixed_events.csv",
                     "duration_periods",
-                    "impossible_constraint",
-                    f"Fixed event {event.event_id} extends beyond the school day.",
+                    "fixed_event_duration",
+                    f"Fixed event {event.event_id} starts at {event.period} for {event.duration_periods} period(s), "
+                    f"which extends beyond the configured {len(project.school.periods)} periods.",
+                    row=row,
                 )
             )
-        if event.applies_to and event.applies_to not in known_applies_to:
+        targets = resolve_fixed_event_targets(project, event)
+        if event.applies_to and targets is None:
             issues.append(
-                ValidationIssue(
-                    file="fixed_events.csv",
-                    field="applies_to",
-                    severity="warning",
-                    category="invalid_reference",
-                    message=f"Fixed event {event.event_id} applies_to value {event.applies_to} was not recognised.",
+                _fatal(
+                    "fixed_events.csv",
+                    "applies_to",
+                    "fixed_event_target",
+                    f"Fixed event {event.event_id} targets {event.applies_to!r}, but this is not a recognised teacher, "
+                    "room, group, year-group or reserved target.",
+                    row=row,
                 )
             )
+        for field, values, known_ids, label in (
+            ("required_teacher_ids", event.required_teacher_ids, set(project.teachers), "teacher"),
+            ("required_room_ids", event.required_room_ids, set(project.rooms), "room"),
+        ):
+            for value in values:
+                if value not in known_ids:
+                    issues.append(
+                        _fatal(
+                            "fixed_events.csv",
+                            field,
+                            "invalid_reference",
+                            f"Fixed event {event.event_id} references unknown {label} {value}.",
+                            row=row,
+                        )
+                    )
+            for value in _duplicate_values(values):
+                issues.append(
+                    _fatal(
+                        "fixed_events.csv",
+                        field,
+                        "duplicate_reference",
+                        f"Fixed event {event.event_id} repeats {label} {value} in {field}.",
+                        row=row,
+                    )
+                )
+        if targets is not None and not (
+            targets.teacher_ids or targets.room_ids or targets.group_ids or targets.year_groups
+        ):
+            if event.applies_to == "SLT":
+                issues.append(
+                    ValidationIssue(
+                        file="fixed_events.csv",
+                        row=row,
+                        field="applies_to",
+                        severity="warning",
+                        category="fixed_event_no_matches",
+                        message=(
+                            f"Fixed event {event.event_id} targets SLT, but no teachers currently have an SLT or "
+                            "Senior role. The event has no blocking effect in this scenario."
+                        ),
+                    )
+                )
+            else:
+                issues.append(
+                    _fatal(
+                        "fixed_events.csv",
+                        "applies_to",
+                        "fixed_event_target",
+                        f"Fixed event {event.event_id} has no recognised target or required resource to block.",
+                        row=row,
+                    )
+                )
     return issues
+
+
+def _duplicate_values(values: list[str]) -> set[str]:
+    seen: set[str] = set()
+    duplicates: set[str] = set()
+    for value in values:
+        if value in seen:
+            duplicates.add(value)
+        seen.add(value)
+    return duplicates
 
 
 def candidate_teachers(project: ProjectData, group: TeachingGroup) -> list[Teacher]:
@@ -465,22 +673,37 @@ def candidate_teachers(project: ProjectData, group: TeachingGroup) -> list[Teach
 
 
 def candidate_rooms(project: ProjectData, group: TeachingGroup) -> list[Room]:
-    rooms = [room for room in project.rooms.values() if room.capacity >= group.class_size]
+    rooms = [
+        room
+        for room in project.rooms.values()
+        if room_satisfies_group_requirements(project, group, room)
+    ]
     requirement = project.subject_room_requirements.get(group.subject)
     if requirement:
         required = requirement.required_room_type
-        if requirement.allow_general_room:
-            rooms = sorted(rooms, key=lambda room: 0 if room.room_type == required else 1)
-        else:
-            rooms = [room for room in rooms if room.room_type == required]
+        rooms = sorted(rooms, key=lambda room: 0 if room.room_type == required else 1)
     else:
         subject = project.subjects.get(group.subject)
         if subject and subject.default_room_type:
             default_type = subject.default_room_type
             rooms = sorted(rooms, key=lambda room: 0 if room.room_type == default_type else 1)
-    if group_requires_computers(project, group):
-        rooms = [room for room in rooms if room.has_computers and room.computer_count >= group.class_size]
     return rooms
+
+
+def room_satisfies_group_requirements(project: ProjectData, group: TeachingGroup, room: Room) -> bool:
+    if room.capacity < group.class_size:
+        return False
+
+    requirement = project.subject_room_requirements.get(group.subject)
+    if requirement:
+        required_type = requirement.required_room_type
+        if room.room_type != required_type:
+            if not requirement.allow_general_room or room.room_type != "General":
+                return False
+
+    if group_requires_computers(project, group):
+        return room.has_computers and room.computer_count >= group.class_size
+    return True
 
 
 def group_requires_computers(project: ProjectData, group: TeachingGroup) -> bool:
@@ -559,5 +782,56 @@ def _priority_for(project: ProjectData, teacher_id: str, subject: str, year_grou
     return None
 
 
-def _fatal(file: str, field: str, category: str, message: str) -> ValidationIssue:
-    return ValidationIssue(file=file, field=field, severity="fatal", category=category, message=message)
+def _validate_constraints(project: ProjectData) -> list[ValidationIssue]:
+    issues: list[ValidationIssue] = []
+    for constraint in project.constraints.values():
+        definition = CONSTRAINT_DEFINITIONS.get(constraint.constraint_name)
+        row = constraint.source_row
+        if definition is None:
+            issues.append(
+                _fatal(
+                    "constraints.csv",
+                    "constraint_name",
+                    "unsupported_constraint",
+                    f"Constraint {constraint.constraint_name!r} is not supported and cannot be enabled or retained as a disabled row.",
+                    row=row,
+                )
+            )
+            continue
+
+        if constraint.constraint_type != definition.constraint_type:
+            issues.append(
+                _fatal(
+                    "constraints.csv",
+                    "constraint_type",
+                    "constraint_type",
+                    f"Constraint {constraint.constraint_name!r} must be declared as {definition.constraint_type}, not {constraint.constraint_type}.",
+                    row=row,
+                )
+            )
+
+        if definition.constraint_type == "HARD" and not constraint.enabled:
+            issues.append(
+                _fatal(
+                    "constraints.csv",
+                    "enabled",
+                    "mandatory_constraint",
+                    f"Mandatory hard constraint {constraint.constraint_name!r} cannot be disabled.",
+                    row=row,
+                )
+            )
+        if definition.constraint_type == "SOFT" and constraint.weight < 0:
+            issues.append(
+                _fatal(
+                    "constraints.csv",
+                    "weight",
+                    "invalid_constraint_weight",
+                    f"Soft constraint {constraint.constraint_name!r} must have a non-negative weight.",
+                    row=row,
+                )
+            )
+    return issues
+
+
+def _fatal(file: str, field: str, category: str, message: str, row: int | None = None) -> ValidationIssue:
+    return ValidationIssue(file=file, row=row, field=field, severity="fatal", category=category, message=message)

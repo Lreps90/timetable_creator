@@ -5,6 +5,18 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 from typing import Callable
 
+from backend.app.constraint_policy import (
+    SOFT_RULE_BALANCE_TEACHER_LOAD,
+    SOFT_RULE_CONSECUTIVE_TEACHER,
+    SOFT_RULE_EMERGENCY_STAFF,
+    SOFT_RULE_OPTION_END,
+    SOFT_RULE_PREFERRED_TEACHER,
+    SOFT_RULE_PRIORITY_TEACHER,
+    SOFT_RULE_ROOM_PREFERENCE,
+    SOFT_RULE_SAME_SUBJECT,
+    SOFT_RULE_SPREAD_GROUP_LESSONS,
+    effective_soft_weight,
+)
 from backend.app.models.entities import (
     ConflictIssue,
     LessonAssignment,
@@ -15,7 +27,13 @@ from backend.app.models.entities import (
     TeachingGroup,
 )
 from backend.app.models.project import ProjectData
-from backend.app.validators.project_validator import candidate_rooms, group_requires_computers
+from backend.app.validators.project_validator import (
+    candidate_rooms,
+    fixed_event_periods,
+    group_requires_computers,
+    resolve_fixed_event_targets,
+)
+from backend.app.solver.verification import apply_verification
 
 
 ProgressCallback = Callable[[float, list[str]], None]
@@ -414,62 +432,56 @@ class HeuristicTimetableSolver:
         teacher = candidate.teacher
 
         if group.preferred_teacher and teacher.teacher_id != group.preferred_teacher:
-            value = self._constraint_weight("preferred_teacher", 3)
+            value = self._constraint_weight(SOFT_RULE_PREFERRED_TEACHER)
             penalty += value
             messages.append(f"{group.group_id} was not assigned to preferred teacher {group.preferred_teacher}.")
 
         if candidate.priority == 2:
-            value = self._constraint_weight("priority", 2)
+            value = self._constraint_weight(SOFT_RULE_PRIORITY_TEACHER)
             penalty += value
             messages.append(f"{teacher.teacher_id} is priority 2 for {group.subject}.")
         elif candidate.priority >= 3:
-            value = self._constraint_weight("emergency", 8)
+            value = self._constraint_weight(SOFT_RULE_EMERGENCY_STAFF)
             penalty += value
             messages.append(f"{teacher.teacher_id} is emergency priority for {group.subject}.")
 
         max_same_day = self._max_same_subject_per_day(group)
         existing_subject_day = self.group_subject_day_load[(group.group_id, group.subject, day)]
         if existing_subject_day >= max_same_day:
-            value = self._constraint_weight("same_subject", 5)
+            value = self._constraint_weight(SOFT_RULE_SAME_SUBJECT)
             penalty += value * (existing_subject_day + 1)
             messages.append(f"{group.group_id} has {group.subject} more than {max_same_day} time(s) on {day}.")
         elif existing_subject_day > 0:
-            value = self._constraint_weight("spread", 2)
+            value = self._constraint_weight(SOFT_RULE_SPREAD_GROUP_LESSONS)
             penalty += value
             messages.append(f"{group.group_id} has another {group.subject} lesson on {day}.")
 
         adjacent = self._teacher_adjacent_count(teacher.teacher_id, day, period)
         if adjacent:
-            value = self._constraint_weight("consecutive", 2)
+            value = self._constraint_weight(SOFT_RULE_CONSECUTIVE_TEACHER)
             penalty += value * adjacent
             messages.append(f"{teacher.teacher_id} has adjacent teaching around {day}-{period}.")
 
         average_day_load = max(1, self.teacher_week_load[teacher.teacher_id] // max(1, len(self.days)))
         if self.teacher_day_load[(teacher.teacher_id, day)] > average_day_load:
-            value = self._constraint_weight("balance", 1)
+            value = self._constraint_weight(SOFT_RULE_BALANCE_TEACHER_LOAD)
             penalty += value
             messages.append(f"{teacher.teacher_id} load is heavier on {day}.")
 
         if is_option_block and self._period_index(period) >= len(self.periods) - 1:
-            value = self._constraint_weight("option_end", 3)
+            value = self._constraint_weight(SOFT_RULE_OPTION_END)
             penalty += value
             messages.append(f"Option block lesson was placed at the end of {day}.")
 
         if not self._preferred_room_type(group, room):
-            value = self._constraint_weight("room_preference", 1)
+            value = self._constraint_weight(SOFT_RULE_ROOM_PREFERENCE)
             penalty += value
             messages.append(f"{room.room_id} is suitable but not the preferred room type for {group.subject}.")
 
         return penalty, messages
 
-    def _constraint_weight(self, keyword: str, default: int) -> int:
-        for constraint in self.project.constraints.values():
-            if not constraint.enabled or constraint.constraint_type != "SOFT":
-                continue
-            haystack = f"{constraint.constraint_name} {constraint.description}".lower()
-            if keyword in haystack:
-                return constraint.weight
-        return default
+    def _constraint_weight(self, penalty_key: str) -> int:
+        return effective_soft_weight(self.project.constraints, penalty_key)
 
     def _preferred_room_type(self, group: TeachingGroup, room: Room) -> bool:
         requirement = self.project.subject_room_requirements.get(group.subject)
@@ -497,45 +509,20 @@ class HeuristicTimetableSolver:
         return count
 
     def _apply_fixed_events(self) -> None:
-        period_index = {period: index for index, period in enumerate(self.periods)}
         for event in self.project.fixed_events:
-            if event.day not in self.days or event.period not in period_index:
+            targets = resolve_fixed_event_targets(self.project, event)
+            blocked_periods = fixed_event_periods(self.project, event)
+            if event.day not in self.days or targets is None or not blocked_periods:
                 continue
-            start_index = period_index[event.period]
-            blocked_periods = self.periods[start_index : start_index + event.duration_periods]
-            teacher_ids = set(event.required_teacher_ids)
-            room_ids = set(event.required_room_ids)
-            group_ids: set[str] = set()
-            year_groups: set[int] = set()
-
-            applies_to = event.applies_to
-            if applies_to == "ALL_STAFF":
-                teacher_ids.update(self.project.teachers)
-            elif applies_to == "SLT":
-                teacher_ids.update(
-                    teacher.teacher_id
-                    for teacher in self.project.teachers.values()
-                    if "slt" in teacher.role.lower() or "senior" in teacher.role.lower()
-                )
-            elif applies_to in self.project.teachers:
-                teacher_ids.add(applies_to)
-            elif applies_to in self.project.rooms:
-                room_ids.add(applies_to)
-            elif applies_to in self.project.teaching_groups:
-                group_ids.add(applies_to)
-            elif applies_to.startswith("Y") and applies_to[1:].isdigit():
-                year_groups.add(int(applies_to[1:]))
-            elif applies_to.isdigit():
-                year_groups.add(int(applies_to))
 
             for blocked_period in blocked_periods:
-                for teacher_id in teacher_ids:
+                for teacher_id in targets.teacher_ids:
                     self.fixed_teacher_slots.add((teacher_id, event.day, blocked_period))
-                for room_id in room_ids:
+                for room_id in targets.room_ids:
                     self.fixed_room_slots.add((room_id, event.day, blocked_period))
-                for group_id in group_ids:
+                for group_id in targets.group_ids:
                     self.fixed_group_slots.add((group_id, event.day, blocked_period))
-                for year_group in year_groups:
+                for year_group in targets.year_groups:
                     self.fixed_year_slots.add((year_group, event.day, blocked_period))
 
     def _explain_task_failure(self, task: Task) -> list[str]:
@@ -628,7 +615,8 @@ def solve_project(
     progress_callback: ProgressCallback | None = None,
 ) -> SolveResult:
     solver = HeuristicTimetableSolver(project, settings)
-    return solver.solve(progress_callback=progress_callback)
+    result = solver.solve(progress_callback=progress_callback)
+    return apply_verification(project, result)
 
 
 def _slot_code(day: str, period: str) -> str:
