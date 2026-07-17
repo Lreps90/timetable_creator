@@ -5,10 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="55cb33b0-d786-4030-92c1-9bff9c3e28d2" name="Changes" comment="Commit">
-      <change beforePath="$PROJECT_DIR$/.idea/timetable_creator.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/timetable_creator.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_app.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/run_app.ps1" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -21,7 +18,7 @@
     </persistenceIdMap>
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="112" />
+    <option name="cachedIndexableFilesCount" value="115" />
     <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
   </component>
   <component name="Git.Settings">
@@ -118,6 +115,7 @@
           </model>
         </option>
         <option name="targetType" value="BACKGROUND" />
+        <option name="worktreeMode" value="WORKSPACE" />
       </template>
     </option>
   </component>
@@ -206,6 +204,8 @@
       <workItem from="1782293513380" duration="2132000" />
       <workItem from="1782374664021" duration="64000" />
       <workItem from="1784189145869" duration="1129000" />
+      <workItem from="1784226285271" duration="6080000" />
+      <workItem from="1784263494505" duration="1702000" />
     </task>
     <task id="LOCAL-00001" summary="Commit">
       <option name="closed" value="true" />
@@ -244,6 +244,11 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="dependencySupport" implementationName="javascript:npm:react" />
+    <option featureType="dependencySupport" implementationName="javascript:npm:vite" />
+    <option featureType="com.intellij.configurationType" implementationName="BatchConfigurationType" />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Commit" />
